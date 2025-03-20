@@ -165,14 +165,14 @@ export default function Home() {
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 min-w-0 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 box-border text-sm sm:text-base placeholder:truncate"
                 placeholder="הכנס מיקום"
                 dir="rtl"
                 spellCheck={false}
             />
             <button
                 type="submit"
-                className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition"
+                className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition whitespace-nowrap"
             >
                 הוסף
             </button>

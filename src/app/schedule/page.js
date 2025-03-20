@@ -1,8 +1,8 @@
 'use client'
 
-import { useSearchParams } from "next/navigation";
-import ScheduleTable from "@/components/ScheduleTable";
-import { Suspense } from "react";
+import { useSearchParams } from "next/navigation"
+import ScheduleTable from "@/components/ScheduleTable"
+import { Suspense } from "react"
 
 function ScheduleContent() {
     const searchParams = useSearchParams()
@@ -38,7 +38,7 @@ function ScheduleContent() {
             <ScheduleTable schedule={schedule} locations={locationList} />
             <button
                 onClick={() => window.location.href = '/'}
-                className="mt-6 w-full max-w-md mx-auto block bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
+                className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
             >
                 חזור להוספת אנשים
             </button>
@@ -82,7 +82,6 @@ function createSchedule(num_people, people_per_slot, peopleList, start_date, sta
     if (num_people < people_per_slot) return "שגיאה: אין מספיק אנשים למילוי כל משבצת"
 
     const shuffledPeople = [...peopleList].sort(() => 0.5 - Math.random())
-
     const schedule = Object.fromEntries(time_slots.map(slot => [slot, []]))
     const last_assignment = Object.fromEntries(peopleList.map(person => [person, -gap_slots - 1]))
 
@@ -97,8 +96,8 @@ function createSchedule(num_people, people_per_slot, peopleList, start_date, sta
             return gapB - gapA
         })
 
-        if (available_people.length >= people_per_slot) {
-            const assigned = available_people.slice(0, people_per_slot)
+        if (available_people.length > 0) {
+            const assigned = available_people.slice(0, Math.min(people_per_slot, available_people.length))
             schedule[slot] = assigned
             assigned.forEach(person => {
                 last_assignment[person] = slot_idx

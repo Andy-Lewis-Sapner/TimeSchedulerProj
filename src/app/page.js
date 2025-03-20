@@ -5,9 +5,21 @@ import {useRouter} from "next/navigation";
 
 export default function Home() {
     const [name, setName] = useState('')
-    const [peopleList, setPeopleList] = useState([])
+    const [peopleList, setPeopleList] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const savedPeople = localStorage.getItem('peopleList');
+            return savedPeople ? JSON.parse(savedPeople) : [];
+        }
+        return [];
+    })
     const [location, setLocation] = useState('')
-    const [locations, setLocations] = useState([])
+    const [locations, setLocations] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const savedLocations = localStorage.getItem('locations');
+            return savedLocations ? JSON.parse(savedLocations) : [];
+        }
+        return [];
+    })
     const [startDate, setStartDate] = useState(() => {
         const today = new Date(Date.now())
         return today.toISOString().split('T')[0]
@@ -19,19 +31,6 @@ export default function Home() {
     })
     const [endHour, setEndHour] = useState('12:00')
     const router = useRouter()
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedPeople = localStorage.getItem('peopleList');
-            if (savedPeople) {
-                setPeopleList(JSON.parse(savedPeople));
-            }
-            const savedLocations = localStorage.getItem('locations');
-            if (savedLocations) {
-                setLocations(JSON.parse(savedLocations));
-            }
-        }
-    }, [])
 
     useEffect(() => {
         if (typeof window !== 'undefined') {

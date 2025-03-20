@@ -8,13 +8,16 @@ export default function Home() {
     const [peopleList, setPeopleList] = useState([])
     const [location, setLocation] = useState('')
     const [locations, setLocations] = useState([])
-    const [peoplePerSlot, setPeoplePerSlot] = useState(1)
     const [startDate, setStartDate] = useState(() => {
         const today = new Date(Date.now())
         return today.toISOString().split('T')[0]
     })
-    const [days, setDays] = useState(1)
-    const [startHour, setStartHour] = useState('08:00')
+    const [startHour, setStartHour] = useState('12:00')
+    const [endDate, setEndDate] = useState(() => {
+        const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000)
+        return tomorrow.toISOString().split('T')[0]
+    })
+    const [endHour, setEndHour] = useState('12:00')
     const router = useRouter()
 
     useEffect(() => {
@@ -77,12 +80,32 @@ export default function Home() {
             alert('אנא הוסף לפחות אדם אחד')
             return
         }
-        if (locations.length < peoplePerSlot) {
-            alert('אנא הוסף מספיק שמות למקומות (לפי מספר המקומות שהגדרת)')
+        if (locations.length === 0) {
+            alert('אנא הוסף לפחות מקום אחד')
             return
         }
+        if (peopleList.length < locations.length) {
+            alert('אנא הוסף מספיק אנשים (לפחות כמספר המקומות)')
+            return
+        }
+
+        const start = new Date(startDate)
+        const end = new Date(endDate)
+        const timeDiff = end - start
+        const hours = timeDiff / (1000 * 60 * 60)
+
+        if (hours <= 0) {
+            alert('תאריך הסיום חייב להיות מאוחר מתאריך ההתחלה')
+            return
+        }
+
+        if (hours % 4 !== 0) {
+            alert('משך הזמן הכולל חייב להתחלק ב-4 שעות (משך משבצת אחת)')
+            return
+        }
+
         router.push(
-            `/schedule?people=${encodeURIComponent(JSON.stringify(peopleList))}&peoplePerSlot=${peoplePerSlot}&startDate=${startDate}&days=${days}&startHour=${encodeURIComponent(startHour)}&locations=${encodeURIComponent(JSON.stringify(locations))}`
+            `/schedule?people=${encodeURIComponent(JSON.stringify(peopleList))}&peoplePerSlot=${locations.length}&startDate=${startDate}&startHour=${encodeURIComponent(startHour)}&endDate=${endDate}&endHour=${encodeURIComponent(endHour)}&locations=${encodeURIComponent(JSON.stringify(locations))}`
         )
     }
 
@@ -90,12 +113,12 @@ export default function Home() {
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 border border-gray-300 rounded-lg">
       <h1 className="text-2xl font-bold mb-6">הוספת אנשים ללוח זמנים</h1>
         <div className="w-full max-w-md border-2 border-blue-400 rounded-xl p-4 bg-white shadow-md">
-      <form onSubmit={handleAddName} className="mb-4 flex gap-2">
+      <form onSubmit={handleAddName} className="mb-4 flex flex-wrap gap-2">
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 min-w-0 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="הכנס שם"
             dir="rtl"
             spellCheck={false}
@@ -118,7 +141,7 @@ export default function Home() {
       {peopleList.length > 0 && (
           <div className="mb-6 border border-gray-200 rounded-lg p-3 bg-gray-50">
               <h2 className="text-lg font-semibold mb-2">רשימת אנשים:</h2>
-              <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {peopleList.map((person, index) => (
                       <li
                         key={index}
@@ -137,7 +160,7 @@ export default function Home() {
           </div>
       )}
 
-        <form onSubmit={handleAddLocation} className="mb-4 flex gap-2">
+        <form onSubmit={handleAddLocation} className="mb-4 flex flex-wrap gap-2">
             <input
                 type="text"
                 value={location}
@@ -192,23 +215,6 @@ export default function Home() {
               />
           </div>
           <div className="mb-4">
-              <label htmlFor="days" className="block text-gray-700 mb-2">
-                  מספר ימים:
-              </label>
-              <input
-                  id="days"
-                  type="number"
-                  value={days}
-                  onChange={(e) => {
-                      if (e.target.value === "") setDays(1)
-                      else setDays(Math.max(1, parseInt(e.target.value)))
-                  }}
-                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  min="1"
-                  dir="rtl"
-              />
-          </div>
-          <div className="mb-4">
               <label htmlFor="startHour" className="block text-gray-700 mb-2">
                   שעת התחלה:
               </label>
@@ -220,23 +226,30 @@ export default function Home() {
                   className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
           </div>
-            <div className="mb-4">
-                <label htmlFor="peoplePerSlot" className="block text-gray-700 mb-2">
-                    מספר מקומות רצוי:
-                </label>
-                <input
-                    id="peoplePerSlot"
-                    type="number"
-                    value={peoplePerSlot}
-                    onChange={(e) => {
-                        if (e.target.value === "") setPeoplePerSlot(1)
-                        else setPeoplePerSlot(Math.max(1, parseInt(e.target.value)))
-                    }}
-                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min="1"
-                    dir="rtl"
-                />
-            </div>
+          <div className="mb-4">
+              <label htmlFor="endDate" className="block text-gray-700 mb-2">
+                  תאריך סיום:
+              </label>
+              <input
+                  id="endDate"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+          </div>
+          <div className="mb-4">
+              <label htmlFor="endHour" className="block text-gray-700 mb-2">
+                  שעת סיום:
+              </label>
+              <input
+                  id="endHour"
+                  type="time"
+                  value={endHour}
+                  onChange={(e) => setEndHour(e.target.value)}
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+          </div>
             <button
                 type="submit"
                 className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"

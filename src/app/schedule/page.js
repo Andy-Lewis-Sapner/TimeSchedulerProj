@@ -44,7 +44,7 @@ function ScheduleContent() {
 }
 
 function createSchedule(num_people, people_per_slot, peopleList, start_date, days, start_hour) {
-    const [startHour, startMinute] = start_hour.split(':').map(Number)
+    const [startHour] = start_hour.split(':').map(Number)
     const base_date = new Date(`${start_date}T${startHour.toString().padStart(2, '0')}:00:00`)
     const slots_per_day = 6
     const total_slots = slots_per_day * days

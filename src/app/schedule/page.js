@@ -1,7 +1,47 @@
 'use client'
 
-import {useSearchParams} from "next/navigation";
+import { useSearchParams, Suspense } from "next/navigation";
 import ScheduleTable from "@/components/ScheduleTable";
+
+function ScheduleContent() {
+    const searchParams = useSearchParams()
+    const people = searchParams.get("people")
+    const peoplePerSlot = searchParams.get("peoplePerSlot")
+    const startDate = searchParams.get("startDate")
+    const days = searchParams.get("days")
+    const startHour = searchParams.get("startHour")
+    const locations = searchParams.get("locations")
+
+    if (!people || !peoplePerSlot || !startDate || !days || !startHour || !locations) {
+        return <p className="text-center">טוען...</p>
+    }
+
+    const peopleList = JSON.parse(decodeURIComponent(people))
+    const locationList = JSON.parse(decodeURIComponent(locations))
+    const schedule = createSchedule(
+        peopleList.length,
+        parseInt(peoplePerSlot),
+        peopleList,
+        startDate,
+        parseInt(days),
+        decodeURIComponent(startHour)
+    )
+
+    const formattedDate = formatSimpleDate(startDate)
+
+    return (
+        <div className="min-h-screen bg-gray-100 p-4">
+            <h1 className="text-2xl font-bold mb-6 text-center">לוח זמנים - {formattedDate}</h1>
+            <ScheduleTable schedule={schedule} locations={locationList} />
+            <button
+                onClick={() => window.location.href = '/'}
+                className="mt-6 w-full max-w-md mx-auto block bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
+            >
+                חזור להוספת אנשים
+            </button>
+        </div>
+    )
+}
 
 function createSchedule(num_people, people_per_slot, peopleList, start_date, days, start_hour) {
     const [startHour, startMinute] = start_hour.split(':').map(Number)
@@ -61,41 +101,9 @@ function formatSimpleDate(dateString) {
 }
 
 export default function Schedule() {
-    const searchParams = useSearchParams()
-    const people = searchParams.get("people")
-    const peoplePerSlot = searchParams.get("peoplePerSlot")
-    const startDate = searchParams.get("startDate")
-    const days = searchParams.get("days")
-    const startHour = searchParams.get("startHour")
-    const locations = searchParams.get("locations")
-
-    if (!people || !peoplePerSlot || !startDate || !days || !startHour || !locations) {
-        return <p className="text-center">טוען...</p>
-    }
-
-    const peopleList = JSON.parse(decodeURIComponent(people))
-    const locationList = JSON.parse(decodeURIComponent(locations))
-    const schedule = createSchedule(
-        peopleList.length,
-        parseInt(peoplePerSlot),
-        peopleList,
-        startDate,
-        parseInt(days),
-        decodeURIComponent(startHour)
-    )
-
-    const formattedDate = formatSimpleDate(startDate)
-
     return (
-        <div className="min-h-screen bg-gray-100 p-4">
-            <h1 className="text-2xl font-bold mb-6 text-center">לוח זמנים - {formattedDate}</h1>
-            <ScheduleTable schedule={schedule} locations={locationList} />
-            <button
-                onClick={() => window.location.href = '/'}
-                className="mt-6 w-full max-w-md mx-auto block bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
-            >
-                חזור להוספת אנשים
-            </button>
-        </div>
+        <Suspense fallback={<p className="text-center">טוען...</p>}>
+            <ScheduleContent />
+        </Suspense>
     )
 }

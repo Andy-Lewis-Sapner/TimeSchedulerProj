@@ -1,7 +1,8 @@
 'use client'
 
-import { useSearchParams, Suspense } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import ScheduleTable from "@/components/ScheduleTable";
+import { Suspense } from "react";
 
 function ScheduleContent() {
     const searchParams = useSearchParams()
